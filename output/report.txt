@@ -1,0 +1,24 @@
+Reporte del análisis de cartera — 2026-06-05 00:27:35
+Tickers: ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA']
+Weights: [0.25, 0.25, 0.2, 0.15, 0.15]
+
+=== MÉTRICAS DE RETORNO ===
+Rendimiento total (Portfolio): 40.63%
+CAGR: 37.47%
+Rendimiento anualizado: 34.19%
+Mejor día: 4.03%
+Peor día: -4.92%
+Días positivos: 56.7%
+
+=== MÉTRICAS DE RIESGO ===
+CAGR: 37.47%
+Volatilidad anual: 21.66%
+Sharpe Ratio: 1.370
+Sortino Ratio: 1.934
+Max Drawdown: -16.28%
+Max DD Duration: 85
+Calamar Ratio: 2.301
+Beta (vs S&P 500): 1.362
+Jensen's alpha: 0.033
+VaR 95% (daily): -0.02
+CVaR 95% (daily): -0.03
