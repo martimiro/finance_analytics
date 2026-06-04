@@ -12,7 +12,7 @@ Valida siempre las entradas en el límite donde ingresan al sistema (importacion
 
 # Definición de portfolio
 
-TICKERS = ['APPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA']
+TICKERS = ["AAPL", 'MSFT', 'GOOGL', 'AMZN', 'TSLA']
 WEIGHTS = [0.25, 0.25, 0.20, 0.15, 0.15]
 
 # Falla ruidosamente al importar si está mal configurado
@@ -25,8 +25,8 @@ assert len(TICKERS) == len(WEIGHTS), 'Las largadas deben coincidir'
 # Datos de mercado
 
 BENCHMARK = '^GSPC' # S&P 500 - usado para Beta, Alpha, comparación gráfica (de rendimientos)
-START_DATE = '2020-01-01' # Fecha de inicio (inclusive)
-END_DATE = '2024-01-31' # Fecha final (inclusive)
+START_DATE = '2024-01-01' # Fecha de inicio (inclusive)
+END_DATE = '2025-01-31' # Fecha final (inclusive)
 
 # Parámetros de riesgo
 
