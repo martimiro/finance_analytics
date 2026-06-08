@@ -25,8 +25,8 @@ assert len(TICKERS) == len(WEIGHTS), 'Las largadas deben coincidir'
 # Datos de mercado
 
 BENCHMARK = '^GSPC' # S&P 500 - usado para Beta, Alpha, comparación gráfica (de rendimientos)
-START_DATE = '2024-01-01' # Fecha de inicio (inclusive)
-END_DATE = '2025-01-31' # Fecha final (inclusive)
+START_DATE = '2025-01-01' # Fecha de inicio (inclusive)
+END_DATE = '2026-03-31' # Fecha final (inclusive)
 
 # Parámetros de riesgo
 
@@ -42,3 +42,13 @@ ARIMA_ORDER = (2, 1, 2) # Tema de Seaborn
 FIGSIZE = (20, 12)  # Figura del dashboard en inches
 DPI = 150 # Resolución de exportación
 STYLE = 'whitegrid' # Tema de Seaborn
+
+SECTORS = {
+  'Tecnología': 'XLK',
+  'Salud': 'XLV',
+  'Finanzas': 'XLF',
+  'Energía': 'XLE',
+  'Consumer Disc': 'XLY',
+  'Utilities': 'XLU',
+  'Real Estate': 'XLRE',
+}
