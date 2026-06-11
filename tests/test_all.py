@@ -44,9 +44,7 @@ def check(condition: bool, description: str) -> bool:
     return condition
 
 
-# ══════════════════════════════════════════════════════════════════════
 # 1. CONFIG
-# ══════════════════════════════════════════════════════════════════════
 def test_config() -> bool:
     section("1. config.py")
     results = []
@@ -69,9 +67,7 @@ def test_config() -> bool:
     return all(results)
 
 
-# ══════════════════════════════════════════════════════════════════════
 # 2. DATA LOADER
-# ══════════════════════════════════════════════════════════════════════
 def test_data_loader(prices: pd.DataFrame) -> bool:
     section("2. data_loader.py")
     results = []
@@ -98,9 +94,7 @@ def test_data_loader(prices: pd.DataFrame) -> bool:
     return all(results)
 
 
-# ══════════════════════════════════════════════════════════════════════
 # 3. RETURNS
-# ══════════════════════════════════════════════════════════════════════
 def test_returns(prices: pd.DataFrame) -> tuple[bool, pd.Series, pd.Series]:
     section("3. returns.py")
     results = []
@@ -155,9 +149,7 @@ def test_returns(prices: pd.DataFrame) -> tuple[bool, pd.Series, pd.Series]:
     return all(results), port_ret, cum_ret
 
 
-# ══════════════════════════════════════════════════════════════════════
 # 4. RISK
-# ══════════════════════════════════════════════════════════════════════
 def test_risk(prices: pd.DataFrame, port_ret: pd.Series,
               cum_ret: pd.Series) -> bool:
     section("4. risk.py")
@@ -216,9 +208,7 @@ def test_risk(prices: pd.DataFrame, port_ret: pd.Series,
     return all(results)
 
 
-# ══════════════════════════════════════════════════════════════════════
 # 5. FORECASTING
-# ══════════════════════════════════════════════════════════════════════
 def test_forecasting(prices: pd.DataFrame) -> bool:
     section("5. forecasting.py")
     results = []
@@ -257,9 +247,7 @@ def test_forecasting(prices: pd.DataFrame) -> bool:
     return all(results)
 
 
-# ══════════════════════════════════════════════════════════════════════
 # 6. OPTIMIZATION
-# ══════════════════════════════════════════════════════════════════════
 def test_optimization(prices: pd.DataFrame, port_ret: pd.Series) -> bool:
     section("6. optimization.py")
     results = []
@@ -296,9 +284,7 @@ def test_optimization(prices: pd.DataFrame, port_ret: pd.Series) -> bool:
     return all(results)
 
 
-# ══════════════════════════════════════════════════════════════════════
 # RUNNER PRINCIPAL
-# ══════════════════════════════════════════════════════════════════════
 def main() -> None:
     print("=" * 50)
     print("  Python Finance Analytics — Test Suite")
@@ -328,9 +314,9 @@ def main() -> None:
     passed = sum(all_passed)
     print(f"\n{'=' * 50}")
     if passed == total:
-        print(f"  ✅ TODOS LOS TESTS PASARON ({passed}/{total})")
+        print(f"TODOS LOS TESTS PASARON ({passed}/{total})")
     else:
-        print(f"  ❌ {total - passed} MÓDULO(S) CON FALLOS ({passed}/{total} OK)")
+        print(f"{total - passed} MÓDULO(S) CON FALLOS ({passed}/{total} OK)")
     print(f"{'=' * 50}\n")
 
     sys.exit(0 if passed == total else 1)
