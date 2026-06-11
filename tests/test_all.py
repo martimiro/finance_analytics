@@ -1,5 +1,3 @@
-# tests/test_all.py
-
 """
 Suite de tests de validación para Python Finance Analytics.
 Ejecutar con:  python tests/test_all.py
@@ -8,6 +6,8 @@ Ejecutar con:  python tests/test_all.py
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -19,7 +19,7 @@ from src.returns      import (daily_returns, log_returns, portfolio_returns,
                                monthly_returns, return_summary)
 from src.risk         import (annualized_volatility, sharpe_ratio, sortino_ratio,
                                drawndown_series, max_drawdown, max_drawdown_duration,
-                               calamar_ratio, beta, jensens_alpha,
+                               calmar_ratio, beta, jensens_alpha,
                                var_historical, cvar_historical,
                                correlation_matrix, risk_sumary)
 from src.forecasting  import (moving_average_signals, linear_regression_forecast,
@@ -36,12 +36,15 @@ def section(title: str) -> None:
     print(f"{'─' * 50}")
 
 
-def check(condition: bool, description: str) -> bool:
-    if condition:
+def check(condition: Any, description: str) -> bool:
+    result = bool(condition)
+
+    if result:
         print(f"{PASS} {description}")
     else:
         print(f"{FAIL} {description}")
-    return condition
+
+    return result
 
 
 # 1. CONFIG
@@ -164,7 +167,7 @@ def test_risk(prices: pd.DataFrame, port_ret: pd.Series,
     sortino= sortino_ratio(port_ret)
     mdd    = max_drawdown(cum_ret)
     mdd_dur= max_drawdown_duration(cum_ret)
-    calmar = calamar_ratio(cagr_val, mdd)
+    calmar = calmar_ratio(cagr_val, mdd)
     b      = beta(port_ret, bench_ret)
     alpha  = jensens_alpha(port_ret, bench_ret)
     var    = var_historical(port_ret)
@@ -215,7 +218,6 @@ def test_forecasting(prices: pd.DataFrame) -> bool:
 
     sample = prices[TICKERS[0]]
 
-    # Moving averages
     ma = moving_average_signals(sample)
     results.append(check(isinstance(ma, pd.DataFrame),
                          "moving_average_signals() devuelve DataFrame"))
@@ -224,7 +226,6 @@ def test_forecasting(prices: pd.DataFrame) -> bool:
     results.append(check(all(f"MA_{w}" in ma.columns for w in [20, 50, 200]),
                          "Columnas MA_20, MA_50, MA_200 presentes"))
 
-    # Stationarity
     from src.returns import log_returns as lr
     log_r = lr(sample.to_frame()).iloc[:, 0]
     stat  = check_stationarity(log_r)
@@ -233,7 +234,6 @@ def test_forecasting(prices: pd.DataFrame) -> bool:
     results.append(check("ADF Statistic" in stat and "p-value" in stat,
                          "check_stationarity() tiene claves correctas"))
 
-    # Linear regression
     lr_result = linear_regression_forecast(sample)
     results.append(check(isinstance(lr_result, dict),
                          "linear_regression_forecast() devuelve dict"))
@@ -254,7 +254,6 @@ def test_optimization(prices: pd.DataFrame, port_ret: pd.Series) -> bool:
 
     daily = daily_returns(prices[TICKERS])
 
-    # Max Sharpe
     opt = max_sharpe_weights(daily)
     results.append(check(isinstance(opt, dict),
                          "max_sharpe_weights() devuelve dict"))
@@ -267,7 +266,6 @@ def test_optimization(prices: pd.DataFrame, port_ret: pd.Series) -> bool:
     results.append(check(0 < opt["volatility"] < 2.0,
                          f"Volatilidad óptima en rango (actual: {opt['volatility']:.2%})"))
 
-    # Monte Carlo
     sims = monte_carlo_simulation(port_ret, n_simulations=100, n_days=252)
     results.append(check(isinstance(sims, np.ndarray),
                          "monte_carlo_simulation() devuelve ndarray"))
@@ -276,7 +274,6 @@ def test_optimization(prices: pd.DataFrame, port_ret: pd.Series) -> bool:
     results.append(check(not np.isnan(sims).any(),
                          "Sin NaN en simulaciones Monte Carlo"))
 
-    # Reproducibilidad (misma semilla → mismo resultado)
     sims2 = monte_carlo_simulation(port_ret, n_simulations=100, n_days=252)
     results.append(check(np.allclose(sims, sims2),
                          "Monte Carlo es reproducible (semilla fija)"))
@@ -284,7 +281,6 @@ def test_optimization(prices: pd.DataFrame, port_ret: pd.Series) -> bool:
     return all(results)
 
 
-# RUNNER PRINCIPAL
 def main() -> None:
     print("=" * 50)
     print("  Python Finance Analytics — Test Suite")
@@ -292,14 +288,11 @@ def main() -> None:
 
     all_passed: list[bool] = []
 
-    # Config
     all_passed.append(test_config())
 
-    # Data (necesario para el resto de tests)
     print("\n  Cargando datos (puede tardar en la primera ejecución)...")
     prices = load_prices()
 
-    # Módulos
     all_passed.append(test_data_loader(prices))
 
     passed, port_ret, cum_ret = test_returns(prices)
@@ -309,9 +302,9 @@ def main() -> None:
     all_passed.append(test_forecasting(prices))
     all_passed.append(test_optimization(prices, port_ret))
 
-    # Resultado final
-    total  = len(all_passed)
+    total = len(all_passed)
     passed = sum(all_passed)
+
     print(f"\n{'=' * 50}")
     if passed == total:
         print(f"TODOS LOS TESTS PASARON ({passed}/{total})")
