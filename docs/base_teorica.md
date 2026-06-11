@@ -401,11 +401,11 @@ significa que la cartera llegó a perder un **35%** respecto a su máximo anteri
 ---
 
 #### Ratio de Calmar
-El **ratio de Calamar** relaciona la rentabilidad anualizada con la peor pérdida histórica registrada.
+El **ratio de Calmar** relaciona la rentabilidad anualizada con la peor pérdida histórica registrada.
 
 ##### Fórmula
 $$
-Calamar = \frac{CAGR}{|MDD|}
+Calmar = \frac{CAGR}{|MDD|}
 $$
 
 donde:
@@ -415,7 +415,7 @@ donde:
 ##### Interpretación
 Un valor más alto es mejor porque indica que la estrategia genera más rentabilidad por cada unidad de pérdida máxima soportada.
 
-El ratio del Calamar:
+El ratio del Calmar:
 - Fondos de cobertura (*hedge funds*).
 - CTAs (*Commodity Trading Advisors*).
 - Gestores cuantitativos.
