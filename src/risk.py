@@ -80,9 +80,9 @@ def max_drawdown_duration(cum_returns: pd.Series) -> int:
 
   return max_dur
 
-def calamar_ratio(cagr_val: float, mdd: float) -> float:
+def calmar_ratio(cagr_val: float, mdd: float) -> float:
   """
-  Calamar ratio -> Valor alto = mejor
+  Calmar ratio -> Valor alto = mejor
   """
 
   return float(cagr_val / abs(mdd)) if mdd != 0 else float('nan')
@@ -146,7 +146,7 @@ def risk_sumary(port_ret: pd.Series, bench_ret: pd.Series, cum_ret: pd.Series, c
     'Sortino Ratio': f'{sortino_ratio(port_ret):.3f}',
     'Max Drawdown': f'{mdd:.2%}',
     'Max DD Duration': f'{max_drawdown_duration(cum_ret)}',
-    'Calamar Ratio': f'{calamar_ratio(cagr_val, mdd):.3f}',
+    'Calamar Ratio': f'{calmar_ratio(cagr_val, mdd):.3f}',
     'Beta (vs S&P 500)': f'{beta(port_ret, bench_ret):.3f}',
     "Jensen's alpha": f'{jensens_alpha(port_ret, bench_ret):.3f}',
     'VaR 95% (daily)': f'{var_historical(port_ret):.2f}',
