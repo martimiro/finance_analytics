@@ -103,32 +103,45 @@ def check_stationarity(series: pd.Series) -> dict:
 
 def arima_forecast(prices: pd.Series, order: tuple = ARIMA_ORDER) -> dict:
     """
-    Ajusta ARIMA(p,d,q) sobre log-precios y predice FORECAST_DAYS días.
+    Ajusta ARIMA(p,d,q) sobre log-retornos (estacionarios) y predice FORECAST_DAYS días.
+    Luego reconstruye los precios futuros acumulando los retornos predichos.
     Devuelve forecast, IC al 95%, fechas, AIC y BIC.
     """
-    log_prices: pd.Series = pd.Series(
-        np.log(prices.values), index=prices.index
-    )
-
-    stat = check_stationarity(log_prices.diff().dropna())
+    # Convertir precios a retornos logarítmicos (estacionarios)
+    log_prices: pd.Series = pd.Series(np.log(prices.values), index=prices.index)
+    log_returns: pd.Series = log_prices.diff().dropna()
+    
+    stat = check_stationarity(log_returns)
     print(
         f"[ARIMA] ADF={stat['ADF Statistic']}, "
         f"p={stat['p-value']}, "
         f"Stationary={stat['Stationary']}"
     )
 
-    result = ARIMA(log_prices, order=order).fit()
+    # Aplicar ARIMA sobre retornos (estacionarios), no sobre precios
+    result = ARIMA(log_returns, order=order).fit()
     fc_obj = result.get_forecast(steps=FORECAST_DAYS)
     ci     = fc_obj.conf_int(alpha=0.05)
+
+    # Reconstruir precios: último precio + retornos acumulados predichos
+    last_price = prices.iloc[-1]
+    forecast_returns = fc_obj.predicted_mean.values
+    forecast_returns_lower = ci.iloc[:, 0].values
+    forecast_returns_upper = ci.iloc[:, 1].values
+    
+    # Acumular retornos para obtener precios
+    forecast_prices = last_price * np.exp(np.cumsum(forecast_returns))
+    forecast_lower = last_price * np.exp(np.cumsum(forecast_returns_lower))
+    forecast_upper = last_price * np.exp(np.cumsum(forecast_returns_upper))
 
     future_dates = pd.bdate_range(
         start=prices.index[-1], periods=FORECAST_DAYS + 1
     )[1:]
 
     return {
-        "forecast": np.exp(fc_obj.predicted_mean.values),
-        "lower_95": np.exp(ci.iloc[:, 0].values),
-        "upper_95": np.exp(ci.iloc[:, 1].values),
+        "forecast": forecast_prices,
+        "lower_95": forecast_lower,
+        "upper_95": forecast_upper,
         "dates":    future_dates,
         "aic":      result.aic,
         "bic":      result.bic,

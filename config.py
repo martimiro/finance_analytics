@@ -17,10 +17,10 @@ WEIGHTS = [0.25, 0.25, 0.20, 0.15, 0.15]
 
 # Falla ruidosamente al importar si está mal configurado
 assert abs(sum(WEIGHTS) - 1.0) < 1e-10, (
-  f'Weights suma: {sum(WEIGHTS):.6f)}, no 1.0. Arregla config.py'
+  f'WEIGHTS suman {sum(WEIGHTS):.6f}, no 1.0. Arregla config.py'
 )
 
-assert len(TICKERS) == len(WEIGHTS), 'Las largadas deben coincidir'
+assert len(TICKERS) == len(WEIGHTS), 'Las longitudes deben coincidir'
 
 # Datos de mercado
 
@@ -34,9 +34,9 @@ RISK_FEE = 0.045  # Tasa anual libre de riesgo (letras del Tesoro de EE. UU. a 3
 VAR_CONFIDENCE = 0.95 # Nivel de confianza para VaR y CVaR
 
 # Pronóstico/Predicciones
-FORECAST_DAYS = 30  # Mesura de la figura del Dashboarn (en inches)
-MA_WINDOWS = [20, 50, 200]  # Resolucion de exportación
-ARIMA_ORDER = (2, 1, 2) # Tema de Seaborn
+FORECAST_DAYS = 30  # Horizonte de forecast en días de trading
+MA_WINDOWS = [20, 50, 200]  # Ventanas de media móvil (días)
+ARIMA_ORDER = (2, 1, 2)  # Orden (p, d, q) del modelo ARIMA
 
 # Visualización
 FIGSIZE = (20, 12)  # Figura del dashboard en inches
@@ -48,7 +48,7 @@ SECTORS = {
   'Salud': 'XLV',
   'Finanzas': 'XLF',
   'Energía': 'XLE',
-  'Consumer Disc': 'XLY',
-  'Utilities': 'XLU',
-  'Real Estate': 'XLRE',
+  'Consumo Discrecional': 'XLY',
+  'Servicios Públicos': 'XLU',
+  'Bienes Raíces': 'XLRE',
 }

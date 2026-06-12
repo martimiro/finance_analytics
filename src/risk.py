@@ -22,7 +22,7 @@ def rolling_volatility(returns: pd.Series, window: int = 30) -> pd.Series:
   Volatilidad móvil anualizada
   """
 
-  return returns.rolling(window).std * np.sqrt(252)
+  return returns.rolling(window).std() * np.sqrt(252)
 
 # Sharpe y Sortino
 def sharpe_ratio(returns: pd.Series) -> float:
@@ -118,7 +118,7 @@ def var_historical(returns: pd.Series, confidence: float = VAR_CONFIDENCE) -> fl
 
 def cvar_historical(returns: pd.Series, confidence: float = VAR_CONFIDENCE) -> float:
   """
-  Conditional Value at Rist (CVaR)
+  Conditional Value at Risk (CVaR)
   """
 
   var = var_historical(returns, confidence)
@@ -140,7 +140,6 @@ def risk_sumary(port_ret: pd.Series, bench_ret: pd.Series, cum_ret: pd.Series, c
 
   mdd = max_drawdown(cum_ret)
   return {
-    'CAGR': f'{cagr_val:.2%}',
     'Volatilidad anual': f'{annualized_volatility(port_ret):.2%}',
     'Sharpe Ratio': f'{sharpe_ratio(port_ret):.3f}',
     'Sortino Ratio': f'{sortino_ratio(port_ret):.3f}',
@@ -149,6 +148,6 @@ def risk_sumary(port_ret: pd.Series, bench_ret: pd.Series, cum_ret: pd.Series, c
     'Calamar Ratio': f'{calmar_ratio(cagr_val, mdd):.3f}',
     'Beta (vs S&P 500)': f'{beta(port_ret, bench_ret):.3f}',
     "Jensen's alpha": f'{jensens_alpha(port_ret, bench_ret):.3f}',
-    'VaR 95% (daily)': f'{var_historical(port_ret):.2f}',
-    'CVaR 95% (daily)': f'{cvar_historical(port_ret):.2f}',
+    'VaR 95% (daily)': f'{var_historical(port_ret):.2%}',
+    'CVaR 95% (daily)': f'{cvar_historical(port_ret):.2%}',
   }

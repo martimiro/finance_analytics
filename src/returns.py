@@ -7,8 +7,36 @@ Convierte precios brutos en retornos simples, logarítmicos y agregaciones a niv
 
 import numpy as np
 import pandas as pd
-from typing import cast
-from config import WEIGHTS, TICKERS
+from typing import cast, overload
+from config import WEIGHTS, TICKERS, START_DATE, END_DATE
+
+
+@overload
+def filter_period(
+    data: pd.Series,
+    start: str | None = None,
+    end: str | None = None,
+) -> pd.Series: ...
+
+
+@overload
+def filter_period(
+    data: pd.DataFrame,
+    start: str | None = None,
+    end: str | None = None,
+) -> pd.DataFrame: ...
+
+
+def filter_period(
+    data: pd.Series | pd.DataFrame,
+    start: str | None = None,
+    end: str | None = None,
+) -> pd.Series | pd.DataFrame:
+    """
+    Restringe una serie o DataFrame al período de análisis (START_DATE–END_DATE).
+    Los datos extendidos del loader se usan solo para indicadores (p. ej. MA 200).
+    """
+    return data.loc[start or START_DATE : end or END_DATE]
 
 
 def daily_returns(prices: pd.DataFrame) -> pd.DataFrame:

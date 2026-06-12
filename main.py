@@ -10,13 +10,14 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 
 from src.data_loader    import load_prices, price_summary
-from src.returns        import (daily_returns, portfolio_returns, cumulative_returns, cagr, return_summary)
+from src.returns        import (daily_returns, portfolio_returns, cumulative_returns,
+                                cagr, return_summary, filter_period)
 from src.risk           import (risk_sumary, drawndown_series, correlation_matrix)
 from src.visualization  import plot_dashboard
 from src.forecasting    import plot_forecast
 from src.market_trends  import sector_risk_return_chart, plot_rolling_beta, plot_regime
 from src.optimization   import plot_efficient_frontier, plot_monte_carlo
-from config             import TICKERS, BENCHMARK, WEIGHTS
+from config             import TICKERS, BENCHMARK, WEIGHTS, START_DATE, END_DATE
 
 
 def main(force_download: bool = False) -> None:
@@ -31,12 +32,14 @@ def main(force_download: bool = False) -> None:
     prices = load_prices(force_download=force_download)
     print(price_summary(prices).to_string())
 
-    # [2/11] Calcular retornos
+    # [2/11] Calcular retornos (período config; precios extendidos solo para MA/forecast)
     print("\n[2/11] Calculando retornos...")
-    daily     = daily_returns(prices[TICKERS])
+    daily_all = daily_returns(prices[TICKERS])
+    bench_all = daily_returns(prices[[BENCHMARK]])[BENCHMARK]
+    daily     = filter_period(daily_all)
+    bench_ret = filter_period(bench_all)
     port_ret  = portfolio_returns(daily)
     cum_ret   = cumulative_returns(port_ret)
-    bench_ret = daily_returns(prices[[BENCHMARK]])[BENCHMARK]
     bench_cum = cumulative_returns(bench_ret)
     cagr_val  = cagr(port_ret)
     ret_met   = return_summary(daily, port_ret)
@@ -60,6 +63,7 @@ def main(force_download: bool = False) -> None:
     os.makedirs("output", exist_ok=True)
     lines = [
         f"Reporte del análisis de cartera — {ts}",
+        f"Período: {START_DATE} → {END_DATE}",
         f"Tickers: {TICKERS}",
         f"Weights: {WEIGHTS}",
         "\n=== MÉTRICAS DE RETORNO ===",
@@ -89,7 +93,7 @@ def main(force_download: bool = False) -> None:
 
     # [9/11] Detección de régimen por volatilidad
     print("\n[9/11] Detectando régimen de volatilidad...")
-    plot_regime(port_ret, cum_ret, window=21, threshold=0.20)
+    plot_regime(port_ret, cum_ret, window=10, percentile=70)
 
     # [10/11] Frontera eficiente - pesos optimos de máximo Sharpe
     print("\n[10/11] Calculado frontera eficiente...")

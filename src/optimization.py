@@ -31,7 +31,7 @@ def _portfolio_stats(weights: np.ndarray, mean_ret: pd.Series, cov_mat: pd.DataF
 def max_sharpe_weights(daily_ret: pd.DataFrame) -> dict:
     """
     Encuentra los pesos del portfolio de máximo Sharpe usando optimización SLSQP
-    con restricciones de suma 1 y posiciones únicamente largas (long-only).
+    con restricciones de suma 1 y máximo 35% por activo (límite de diversificación).
     """
     mean_ret = daily_ret.mean() * 252
     cov_mat = daily_ret.cov() * 252
@@ -45,7 +45,7 @@ def max_sharpe_weights(daily_ret: pd.DataFrame) -> dict:
         neg_sharpe, 
         x0=np.ones(n) / n, 
         method='SLSQP', 
-        bounds=[(0.0, 1.0)] * n, 
+        bounds=[(0.05, 0.35) for _ in range(n)],  # Min 5%, Max 35% por activo
         constraints=[{"type": 'eq', 'fun': lambda w: np.sum(w) - 1}], 
         options={'maxiter': 1000, 'ftol': 1e-12}
     )
@@ -133,8 +133,9 @@ def plot_efficient_frontier(daily_ret: pd.DataFrame, n_portfolios: int = 5_000) 
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.5, f'{w*100:.1f}%', ha='center', va='bottom', fontsize=10)
   
     ax.set_ylabel("Peso (%)")
-    ax.set_title(f"Pesos óptimos - Sharpe: {opt['sharpe']:.2f} |\n"
-                 f"Retorno: {opt_ret*100:.1f}% | Vol: {opt_vol*100:.1f}%")
+    ax.set_title(f"Pesos óptimos (Sharpe: {opt['sharpe']:.2f})\n"
+                 f"Retorno: {opt_ret*100:.1f}% | Vol: {opt_vol*100:.1f}%\n"
+                 f"(Portafolio teórico óptimo - no es tu cartera actual)")
     ax.set_ylim(0, max(opt_w * 100) * 1.2)
 
     plt.tight_layout()

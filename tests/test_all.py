@@ -16,7 +16,7 @@ from config import TICKERS, WEIGHTS, BENCHMARK, RISK_FEE, VAR_CONFIDENCE
 from src.data_loader  import load_prices, price_summary
 from src.returns      import (daily_returns, log_returns, portfolio_returns,
                                cumulative_returns, cagr, annualized_return,
-                               monthly_returns, return_summary)
+                               monthly_returns, return_summary, filter_period)
 from src.risk         import (annualized_volatility, sharpe_ratio, sortino_ratio,
                                drawndown_series, max_drawdown, max_drawdown_duration,
                                calmar_ratio, beta, jensens_alpha,
@@ -102,7 +102,7 @@ def test_returns(prices: pd.DataFrame) -> tuple[bool, pd.Series, pd.Series]:
     section("3. returns.py")
     results = []
 
-    daily    = daily_returns(prices[TICKERS])
+    daily    = filter_period(daily_returns(prices[TICKERS]))
     port_ret = portfolio_returns(daily)
     cum_ret  = cumulative_returns(port_ret)
     cagr_val = cagr(port_ret)
@@ -110,8 +110,10 @@ def test_returns(prices: pd.DataFrame) -> tuple[bool, pd.Series, pd.Series]:
 
     results.append(check(isinstance(daily, pd.DataFrame),
                          "daily_returns() devuelve DataFrame"))
-    results.append(check(len(daily) == len(prices) - 1,
-                         f"daily_returns() tiene n-1 filas (actual: {len(daily)})"))
+    results.append(check(len(daily_returns(prices[TICKERS])) == len(prices) - 1,
+                         f"daily_returns() tiene n-1 filas"))
+    results.append(check(len(daily) >= 20,
+                         f"filter_period() devuelve datos del período (actual: {len(daily)} filas)"))
     results.append(check(daily.isnull().sum().sum() == 0,
                          "Sin NaN en daily_returns()"))
     results.append(check(isinstance(port_ret, pd.Series),
@@ -158,8 +160,8 @@ def test_risk(prices: pd.DataFrame, port_ret: pd.Series,
     section("4. risk.py")
     results = []
 
-    daily     = daily_returns(prices[TICKERS])
-    bench_ret = daily_returns(prices[[BENCHMARK]])[BENCHMARK]
+    daily     = filter_period(daily_returns(prices[TICKERS]))
+    bench_ret = filter_period(daily_returns(prices[[BENCHMARK]])[BENCHMARK])
     cagr_val  = cagr(port_ret)
 
     vol    = annualized_volatility(port_ret)
@@ -205,8 +207,8 @@ def test_risk(prices: pd.DataFrame, port_ret: pd.Series,
                          "drawdown_series() siempre <= 0"))
 
     metrics = risk_sumary(port_ret, bench_ret, cum_ret, cagr_val)
-    results.append(check(isinstance(metrics, dict) and len(metrics) == 11,
-                         f"risk_summary() tiene 11 claves (actual: {len(metrics)})"))
+    results.append(check(isinstance(metrics, dict) and len(metrics) == 10,
+                         f"risk_summary() tiene 10 claves (actual: {len(metrics)})"))
 
     return all(results)
 
@@ -252,7 +254,7 @@ def test_optimization(prices: pd.DataFrame, port_ret: pd.Series) -> bool:
     section("6. optimization.py")
     results = []
 
-    daily = daily_returns(prices[TICKERS])
+    daily = filter_period(daily_returns(prices[TICKERS]))
 
     opt = max_sharpe_weights(daily)
     results.append(check(isinstance(opt, dict),

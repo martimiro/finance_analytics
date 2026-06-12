@@ -57,7 +57,7 @@ def sector_risk_return_chart() -> None:
   ax.axhline(0, color="black", lw=0.8, linestyle=":")
   ax.set_xlabel("Volatilidad anualizada (%)", fontsize=12)
   ax.set_ylabel("Rendimiento anualizado (%)", fontsize=12)
-  ax.set_title("Análisis sector ETF — Risk vs Return",
+  ax.set_title("Análisis sector ETF — Riesgo vs Retorno",
                  fontsize=14, fontweight="bold")
   ax.legend(loc="lower right", fontsize=9)
 
@@ -106,35 +106,47 @@ def plot_rolling_beta(port_ret: pd.Series, bench_ret: pd.Series, window: int = 6
   ax.fill_between(betas.index, betas.where(betas > 1), 1.0, where=(betas > 1).to_numpy().tolist(), alpha = 0.15, color = '#DC2626', label = "Régimen agresivo (β > 1)",)
   ax.fill_between(betas.index, betas.where(betas < 1), 1.0, where=(betas < 1).to_numpy().tolist(), alpha = 0.15, color = '#16A34A', label = "Régimen defensivo (β < 1)",)
   ax.set_title('Rolling Beta (63-day Window)')
+  ax.set_ylim([0.9, ax.get_ylim()[1] * 1.05])
+  ax.set_ylabel('Beta')
+  ax.legend(fontsize=9)
+  plt.tight_layout()
   plt.savefig('output/rolling_beta.png', dpi=150, bbox_inches='tight')
   #plt.show()
 
 # Detección de régimen por volatilidad
-def detect_regime(port_ret: pd.Series, window : int = 21, threshold: float = 0.20) -> pd.Series:
+def detect_regime(port_ret: pd.Series, window : int = 10, percentile: float = 70) -> pd.Series:
   """
-  Clasifica cada día en régimen de BAJA o ALTA volatilidad según si la volatilidad rolling es anualizada supera el umbral.
+  Clasifica cada día en régimen de BAJA o ALTA volatilidad según si la volatilidad rolling
+  supera el percentil especificado de la distribución histórica (umbral adaptativo).
+
+  Parameters
+  ----------
+  port_ret: retornos diarios del portfolio
+  window: tamaño de ventana para volatilidad rolling
+  percentile: percentil de volatilidad histórica (ej. 70 = p70)
 
   Returns
   -------
   pd.Series con valores "Alta volatilidad / Baja volatilidad"
   """
   rolling_vol = port_ret.rolling(window).std() * np.sqrt(252)
+  threshold = rolling_vol.quantile(percentile / 100)
   regime = rolling_vol.apply(lambda v: "Alta volatilidad" if v > threshold else "Baja volatilidad")
   regime.name = "Régimen"
   return regime
 
-def plot_regime(port_ret: pd.Series, cum_ret: pd.Series, window: int = 21, threshold: float = 0.20) -> None:
+def plot_regime(port_ret: pd.Series, cum_ret: pd.Series, window: int = 10, percentile: float = 70) -> None:
   """
-  Gráfica el retorno acumulado con el régimen de volatilidad
+  Gráfica el retorno acumulado con el régimen de volatilidad adaptativo
   """
-  regime = detect_regime(port_ret, window, threshold)
+  regime = detect_regime(port_ret, window, percentile)
   high_vol = (regime == "Alta volatilidad")
   fig, ax = plt.subplots(figsize = (14, 5))
 
   (cum_ret * 100).plot(ax=ax, color = '#1D4ED8', lw = 2,  label = 'Retorno acumulado (%)')
 
   # Sombrear períodos de alta volatilidad
-  ax.fill_between(cum_ret.index, ax.get_ylim()[0], ax.get_ylim()[1], where=high_vol.reindex(cum_ret.index, fill_value=False).to_numpy().tolist(), alpha = 0.12, color = '#DC2626', label = f'Alta volatilidad (vol > {threshold:.0%})')
+  ax.fill_between(cum_ret.index, ax.get_ylim()[0], ax.get_ylim()[1], where=high_vol.reindex(cum_ret.index, fill_value=False).to_numpy().tolist(), alpha = 0.12, color = '#DC2626', label = f'Alta volatilidad (vol > p{percentile})')
   ax.set_title("Retorno acumulado con detección de régimen", fontsize = 13, fontweight = 'bold')
   ax.set_ylabel("Retorno (%)")
   ax.legend(fontsize = 9)

@@ -14,6 +14,7 @@ import yfinance as yf
 import pandas as pd
 
 from config import TICKERS, BENCHMARK, START_DATE, END_DATE
+from datetime import datetime, timedelta
 
 CACHE_PATH = "data/prices.csv"
 
@@ -21,6 +22,8 @@ CACHE_PATH = "data/prices.csv"
 def load_prices(force_download: bool = False) -> pd.DataFrame:
     """
     Carga los precios de cierre ajustados para todos los tickers + benchmark.
+    Pre-carga 200 días históricos ANTES de START_DATE para asegurar que 
+    indicadores técnicos como MA 200 se grafiquen completos desde el inicio.
 
     Parameters
     ----------
@@ -43,13 +46,18 @@ def load_prices(force_download: bool = False) -> pd.DataFrame:
         print(f"[loader] Cargadas {len(df):,} filas desde caché ({CACHE_PATH})")
         return df
 
-    # Descargar desde Yahoo Finance
+    # Descargar desde Yahoo Finance con 200 días previos
     all_tickers = TICKERS + [BENCHMARK]
     print(f"[loader] Descargando {len(all_tickers)} tickers ...")
 
+    # Calcular fecha de inicio extendida (200 días hábiles antes)
+    start_dt = datetime.strptime(START_DATE, '%Y-%m-%d')
+    # Aproximación: 200 días / 5*252 = 40 semanas = ~280 días calendario
+    extended_start = (start_dt - timedelta(days=280)).strftime('%Y-%m-%d')
+
     raw = yf.download(
         all_tickers,
-        start=START_DATE,
+        start=extended_start,
         end=END_DATE,
         auto_adjust=True,   # ajusta splits + dividendos; campo correcto = "Close"
         progress=False,
